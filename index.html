@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="tcMeta" content="#06132F">
+<title>PharmaTrack · Boots T3</title>
+<link rel="manifest" href="manifest.json">
+<style>
+/* ═══════════════════════════════════
+   iOS GLASS TOKENS
+═══════════════════════════════════ */
+:root{
+  --bg:#06132F;
+  --c1:rgba(29,59,111,.68);
+  --c2:rgba(8,27,62,.80);
+  --surface:rgba(23,49,94,.52);
+  --border:rgba(117,169,255,.20);
+  --border-hi:rgba(153,194,255,.42);
+  --lemon:#7195FF;
+  --leaf:#36D6A0;
+  --teal:#48DDF5;
+  --amber:#FFC76A;
+  --red:#FF6485;
+  --text:#F3F6FF;
+  --muted:#A2B7DB;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --nav:60px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+[data-theme="light"]{
+  --bg:#EBF0FF;
+  --c1:rgba(255,255,255,.82);
+  --c2:rgba(240,245,255,.90);
+  --surface:rgba(255,255,255,.80);
+  --border:rgba(80,120,220,.20);
+  --border-hi:rgba(80,120,220,.40);
+  --lemon:#3B5FDB;
+  --leaf:#10A878;
+  --teal:#0099BB;
+  --amber:#B86800;
+  --red:#C91A45;
+  --text:#0A1530;
+  --muted:#4A6080;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(61,119,255,.22),transparent 42%),
+    radial-gradient(ellipse at 100% 42%,rgba(119,75,255,.13),transparent 42%),
+    linear-gradient(155deg,#10285A 0%,#071735 44%,#030D23 100%);
+}
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(80,140,255,.09),transparent 50%),
+    radial-gradient(ellipse at 100% 50%,rgba(100,80,255,.06),transparent 50%),
+    linear-gradient(155deg,#D8E4FF 0%,#EBF0FF 50%,#F4F7FF 100%);
+}
+
+/* ── GLASS CARD ── */
+.gc{
+  background:linear-gradient(145deg,var(--c1),var(--c2));
+  border:1px solid var(--border);
+  border-radius:18px;
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:0 12px 28px rgba(0,0,0,.14);
+  position:relative;overflow:hidden;
+}
+.gc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,0) 60%);pointer-events:none;border-radius:inherit;}
+
+/* ── LAYOUT ── */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1;}
+.header{
+  flex-shrink:0;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,19,47,.75);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  gap:10px;
+}
+.header-brand{display:flex;align-items:center;gap:9px;}
+.header-mark{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#526AFF,#397FFF);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;
+  box-shadow:0 0 14px rgba(80,110,255,.38);
+  flex-shrink:0;
+}
+.header-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.header-sub{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.hbtn{
+  width:34px;height:34px;border-radius:10px;border:1px solid var(--border);
+  background:rgba(23,49,94,.5);backdrop-filter:blur(10px);
+  color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;transition:all .18s;flex-shrink:0;
+}
+.hbtn:active{transform:scale(.92);}
+.live-clock{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal);background:rgba(72,221,245,.1);border:1px solid rgba(72,221,245,.2);padding:4px 9px;border-radius:8px;}
+
+/* ── SCROLL AREA ── */
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{
+  position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding:14px 14px calc(var(--nav) + var(--safe-b) + 14px);
+  display:none;
+  -webkit-overflow-scrolling:touch;
+}
+.page.active{display:block;}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  flex-shrink:0;
+  display:flex;
+  padding:8px 8px calc(var(--safe-b) + 6px);
+  background:rgba(6,19,47,.88);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  gap:4px;
+  z-index:100;
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:3px;padding:7px 4px;border:none;background:none;
+  color:var(--muted);cursor:pointer;border-radius:12px;
+  transition:all .2s;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+}
+.bnav-btn .bi{font-size:20px;line-height:1;}
+.bnav-btn.active{color:var(--lemon);background:rgba(113,149,255,.12);}
+.bnav-btn:active{transform:scale(.93);}
+
+/* ═══════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════ */
+@keyframes fsu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scIn{from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);}}
+@keyframes stepIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);}}
+@keyframes chipIn{from{opacity:0;transform:scale(.87) translateY(7px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes glowR{0%,100%{box-shadow:0 0 0 rgba(255,100,133,0);}50%{box-shadow:0 0 26px rgba(255,100,133,.22);}}
+@keyframes glowA{0%,100%{box-shadow:0 0 0 rgba(255,199,106,0);}50%{box-shadow:0 0 22px rgba(255,199,106,.18);}}
+@keyframes dotBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes scoreGrow{from{width:0;}}
+@keyframes badgePulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+
+/* ═══════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════ */
+.sec-title{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 11px;border-radius:20px;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+}
+.pill-blue{background:rgba(113,149,255,.14);border:1px solid rgba(113,149,255,.28);color:var(--lemon);}
+.pill-green{background:rgba(54,214,160,.14);border:1px solid rgba(54,214,160,.30);color:var(--leaf);}
+.pill-amber{background:rgba(255,199,106,.14);border:1px solid rgba(255,199,106,.28);color:var(--amber);}
+.pill-red{background:rgba(255,100,133,.14);border:1px solid rgba(255,100,133,.28);color:var(--red);}
+.pill-teal{background:rgba(72,221,245,.10);border:1px solid rgba(72,221,245,.24);color:var(--teal);}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--leaf);animation:dotBlink 2.2s infinite;display:inline-block;}
+
+/* stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{padding:14px 10px;text-align:center;animation:fsu .4s ease both;}
+.stat-val{font-family:var(--mono);font-size:22px;font-weight:800;line-height:1;}
+.stat-lbl{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-top:4px;letter-spacing:.06em;}
+
+/* input */
+.inp{
+  width:100%;background:rgba(3,15,39,.6);border:1px solid rgba(121,173,255,.26);
+  border-radius:13px;padding:13px 14px;color:var(--text);
+  font-family:var(--mono);font-size:13px;outline:none;
+  transition:border .2s,box-shadow .2s;
+}
+[data-theme="light"] .inp{background:rgba(230,238,255,.7);border-color:rgba(80,120,220,.22);}
+.inp:focus{border-color:#659AFF;box-shadow:0 0 0 4px rgba(76,132,255,.12);}
+.inp::placeholder{color:var(--muted);}
+.inp-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block;}
+
+/* btn */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 18px;border-radius:14px;font-family:var(--sans);
+  font-size:14px;font-weight:700;cursor:pointer;border:none;
+  transition:transform .16s,box-shadow .18s,opacity .15s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{color:#fff;background:linear-gradient(115deg,#5669FF,#347FFF 65%,#45BDF5);box-shadow:0 8px 20px rgba(55,107,255,.26);}
+.btn-primary:hover{box-shadow:0 12px 26px rgba(55,107,255,.36);}
+.btn-ghost{background:rgba(42,73,129,.35);border:1px solid rgba(132,176,255,.22);color:#C3D6F7;}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:10px;}
+.btn-danger{background:rgba(255,100,133,.14);border:1px solid rgba(255,100,133,.28);color:var(--red);}
+[data-theme="light"] .btn-ghost{background:rgba(60,100,200,.10);border-color:rgba(60,100,200,.2);color:var(--lemon);}
+
+/* section bar */
+.sbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
+.sbar::-webkit-scrollbar{display:none;}
+.sbar-btn{
+  flex-shrink:0;padding:7px 14px;border-radius:20px;
+  font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);background:rgba(23,49,94,.45);color:var(--muted);
+  transition:all .2s;white-space:nowrap;
+}
+.sbar-btn.active{background:linear-gradient(135deg,#526AFF,#397FFF);color:#fff;border-color:rgba(159,189,255,.5);box-shadow:0 4px 16px rgba(60,104,255,.24);}
+
+/* shelf accordion */
+.shelf-item{margin-bottom:10px;animation:fsu .38s ease both;}
+.shelf-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 15px;cursor:pointer;border-radius:14px;
+  background:linear-gradient(145deg,rgba(29,59,111,.6),rgba(8,27,62,.72));
+  border:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  transition:border-color .18s;
+}
+.shelf-hdr.open{border-color:rgba(113,149,255,.4);border-radius:14px 14px 0 0;}
+.shelf-hdr-left{display:flex;align-items:center;gap:10px;}
+.shelf-num{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(113,149,255,.14);border:1px solid rgba(113,149,255,.24);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:800;color:var(--lemon);
+  flex-shrink:0;
+}
+.shelf-title{font-size:13px;font-weight:700;color:var(--text);}
+.shelf-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
+.shelf-body{
+  display:none;
+  border:1px solid rgba(113,149,255,.25);border-top:none;border-radius:0 0 14px 14px;
+  background:rgba(5,16,40,.55);backdrop-filter:blur(14px);overflow:hidden;
+}
+.shelf-body.open{display:block;}
+.prod-row{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(137,180,255,.08);
+  cursor:pointer;transition:background .15s;
+}
+.prod-row:last-child{border-bottom:none;}
+.prod-row:hover,.prod-row:active{background:rgba(113,149,255,.06);}
+.prod-icon{
+  width:32px;height:32px;border-radius:8px;background:rgba(3,15,39,.5);
+  border:1px solid var(--border);display:flex;align-items:center;
+  justify-content:center;font-size:14px;flex-shrink:0;
+}
+.prod-icon.oos{border-color:rgba(255,100,133,.35);background:rgba(255,100,133,.08);}
+.prod-info{flex:1;min-width:0;}
+.prod-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.prod-bc{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.prod-units{
+  font-family:var(--mono);font-size:11px;font-weight:800;flex-shrink:0;
+  padding:3px 8px;border-radius:7px;
+}
+.units-ok{color:var(--leaf);background:rgba(54,214,160,.12);}
+.units-low{color:var(--amber);background:rgba(255,199,106,.12);}
+.units-oos{color:var(--red);background:rgba(255,100,133,.12);}
+
+/* ═══════════════════════════════════
+   HOME PAGE
+═══════════════════════════════════ */
+.recent-list{display:flex;flex-direction:column;gap:8px;}
+.recent-item{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;
+  border-radius:13px;cursor:pointer;
+  animation:fsu .35s ease both;
+}
+.recent-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ri-ok{background:rgba(54,214,160,.14);}
+.ri-warn{background:rgba(255,199,106,.12);}
+.ri-exp{background:rgba(255,100,133,.12);}
+.ri-unk{background:rgba(3,15,39,.5);border:1px solid var(--border);}
+.recent-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recent-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.quick-card{
+  padding:18px 14px;border-radius:16px;cursor:pointer;
+  text-align:center;animation:fsu .4s ease both;
+  transition:transform .18s;
+}
+.quick-card:active{transform:scale(.95);}
+.quick-icon{font-size:28px;margin-bottom:8px;}
+.quick-title{font-size:13px;font-weight:700;color:var(--text);}
+.quick-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ═══════════════════════════════════
+   KPI PAGE
+═══════════════════════════════════ */
+.kpi-slot{
+  display:grid;grid-template-columns:auto 1fr auto;
+  align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(137,180,255,.08);
+  transition:background .15s;
+}
+.kpi-slot:last-child{border-bottom:none;}
+.kpi-slot:active{background:rgba(113,149,255,.06);}
+.kpi-time{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap;}
+.kpi-fields{display:flex;gap:8px;flex-wrap:wrap;}
+.kpi-val{
+  font-family:var(--mono);font-size:13px;font-weight:800;
+  background:rgba(3,15,39,.55);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;cursor:pointer;
+  transition:border-color .15s;min-width:52px;text-align:center;
+}
+.kpi-val:hover{border-color:var(--lemon);}
+.kpi-val-label{font-size:8px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:2px;}
+.kpi-total-bar{
+  display:flex;justify-content:space-around;padding:14px;
+  background:rgba(3,15,39,.6);border-top:1px solid var(--border);
+  border-radius:0 0 16px 16px;
+}
+.kpi-tot-item{text-align:center;}
+.kpi-tot-val{font-family:var(--mono);font-size:16px;font-weight:900;color:var(--lemon);}
+.kpi-tot-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+
+/* ═══════════════════════════════════
+   SCANNER PAGE
+═══════════════════════════════════ */
+.scanner-frame{
+  background:#000;border-radius:14px;height:170px;
+  position:relative;overflow:hidden;margin-bottom:12px;
+  border:1px solid var(--border);
+}
+.scan-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#5a7088;
+  font-size:12px;gap:8px;
+}
+.scan-placeholder-icon{font-size:36px;opacity:.5;}
+#gs1Reader{width:100%;height:100%;}
+#gs1Reader video{object-fit:cover!important;}
+.viewfinder{
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s;
+}
+.viewfinder.on{opacity:1;}
+.vf-box{
+  width:220px;height:90px;border:2px solid var(--lemon);border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.5);position:relative;overflow:hidden;
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:var(--lemon);box-shadow:0 0 8px var(--lemon);
+  animation:scanLine 2s ease-in-out infinite;
+}
+@keyframes scanLine{0%{top:5%;}50%{top:85%;}100%{top:5%;}}
+.inp-row{display:flex;gap:8px;margin-bottom:12px;}
+.inp-row .inp{flex:1;}
+.scan-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0;}
+
+/* History list */
+.hist-wrap{border-radius:16px;border:1px solid var(--border);overflow:hidden;margin-top:14px;}
+.hist-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-bottom:1px solid rgba(137,180,255,.1);
+  background:rgba(3,15,39,.5);
+}
+.hist-list{max-height:320px;overflow-y:auto;}
+.hist-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(137,180,255,.07);cursor:pointer;
+  transition:background .15s;
+}
+.hist-item:last-child{border-bottom:none;}
+.hist-item:active{background:rgba(113,149,255,.06);}
+.h-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.h-ok{background:rgba(54,214,160,.14);}
+.h-warn{background:rgba(255,199,106,.12);}
+.h-exp{background:rgba(255,100,133,.12);}
+.h-unk{background:rgba(3,15,39,.55);border:1px solid var(--border);}
+.hist-info{flex:1;min-width:0;}
+.hist-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.hist-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;}
+.ebadge{padding:2px 7px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:800;}
+.eb-ok{background:rgba(54,214,160,.14);color:var(--leaf);}
+.eb-warn{background:rgba(255,199,106,.12);color:var(--amber);}
+.eb-exp{background:rgba(255,100,133,.12);color:var(--red);}
+.eb-qty{background:rgba(113,149,255,.12);color:var(--lemon);}
+.hist-empty{padding:36px 16px;text-align:center;color:var(--muted);}
+
+/* ═══════════════════════════════════
+   SCAN RESULT BOTTOM SHEET
+═══════════════════════════════════ */
+.sheet-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(10px);z-index:200;
+  display:none;align-items:flex-end;justify-content:center;
+}
+.sheet-overlay.open{display:flex;}
+.sheet{
+  width:100%;max-width:520px;max-height:90vh;
+  overflow-y:auto;
+  background:rgba(8,22,56,.96);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border-hi);
+  backdrop-filter:blur(26px);
+  animation:slideUp .3s cubic-bezier(.2,.8,.4,1) both;
+  padding-bottom:calc(var(--safe-b) + 10px);
+}
+.sheet-drag{width:36px;height:4px;background:rgba(137,180,255,.3);border-radius:2px;margin:12px auto 0;}
+.sheet-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;
+}
+.sheet-status{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;}
+.sclose{
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(137,180,255,.12);color:var(--muted);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+}
+/* match steps */
+.match-steps{padding:0 16px 10px;display:flex;flex-direction:column;gap:5px;}
+.mstep{
+  display:flex;align-items:center;gap:9px;padding:9px 11px;
+  border-radius:10px;background:rgba(3,15,39,.38);
+  border:1px solid rgba(132,176,255,.15);
+  animation:stepIn .28s ease both;
+}
+.mstep.hit{background:rgba(54,214,160,.08);border-color:rgba(54,214,160,.28);}
+.mnum{
+  width:22px;height:22px;border-radius:50%;font-family:var(--mono);
+  font-size:9px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;
+}
+.mnum.p{background:rgba(54,214,160,.15);color:var(--leaf);}
+.mnum.f{background:rgba(255,100,133,.10);color:var(--red);}
+.mlbl{font-family:var(--sans);font-size:11px;flex:1;}
+.mlbl.p{color:var(--leaf);}
+.mlbl.f{color:var(--muted);}
+/* expiry alert */
+.exp-alert{margin:0 16px 10px;padding:10px 14px;border-radius:11px;font-weight:700;font-size:12px;}
+.ea-ok{background:rgba(54,214,160,.12);border:1px solid rgba(54,214,160,.28);color:var(--leaf);}
+.ea-warn{background:rgba(255,199,106,.12);border:1px solid rgba(255,199,106,.28);color:var(--amber);animation:glowA 3s 1s infinite;}
+.ea-exp{background:rgba(255,100,133,.12);border:1px solid rgba(255,100,133,.3);color:var(--red);animation:glowR 2.5s 1s infinite;}
+/* form sections */
+.rs-sec{background:rgba(3,15,39,.45);border-radius:13px;margin:0 16px 10px;padding:13px;}
+.rs-title{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.rs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rs-grid.full{grid-template-columns:1fr;}
+.rs-fld{display:flex;flex-direction:column;gap:4px;}
+.rs-lbl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;}
+.rs-inp{
+  background:rgba(3,15,39,.7);border:1px solid rgba(121,173,255,.2);
+  border-radius:9px;padding:9px 11px;color:var(--text);
+  font-family:var(--mono);font-size:12px;font-weight:700;outline:none;
+  transition:border .18s;
+}
+.rs-inp:focus{border-color:#659AFF;}
+.rs-disp{
+  background:rgba(3,15,39,.7);border:1px solid rgba(121,173,255,.2);
+  border-radius:9px;padding:9px 11px;color:var(--text);
+  font-family:var(--mono);font-size:12px;font-weight:700;min-height:36px;
+}
+.rs-disp.accent{color:var(--lemon);}
+.exp-prev{font-family:var(--mono);font-size:10px;margin-top:4px;min-height:14px;}
+/* qty */
+.qty-row{display:flex;align-items:center;gap:12px;justify-content:center;padding:4px 0;}
+.qadjbtn{
+  width:42px;height:42px;border-radius:10px;border:1px solid var(--border);
+  background:rgba(3,15,39,.6);color:var(--text);font-size:20px;
+  font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+#rs-qty{
+  width:58px;height:42px;text-align:center;
+  background:rgba(3,15,39,.7);border:1px solid var(--border);
+  color:var(--text);border-radius:10px;font-family:var(--mono);
+  font-size:16px;font-weight:900;outline:none;
+}
+.rs-actions{padding:8px 16px 14px;display:flex;flex-direction:column;gap:8px;}
+
+/* ═══════════════════════════════════
+   CALC MODAL
+═══════════════════════════════════ */
+.calc-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(12px);z-index:300;
+  display:none;align-items:flex-end;justify-content:center;
+}
+.calc-overlay.open{display:flex;}
+.calc-sheet{
+  width:100%;max-width:420px;
+  background:rgba(5,18,50,.96);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border-hi);
+  padding:18px 20px calc(var(--safe-b) + 16px);
+  animation:slideUp .28s cubic-bezier(.2,.8,.4,1) both;
+}
+.calc-display{
+  background:rgba(0,0,0,.4);border-radius:14px;padding:14px 18px;
+  margin-bottom:16px;text-align:right;border:1px solid rgba(137,180,255,.12);
+}
+.calc-formula{font-family:var(--mono);font-size:13px;color:var(--muted);min-height:1.2em;margin-bottom:4px;}
+.calc-main{font-family:var(--mono);font-size:32px;font-weight:800;color:var(--text);}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.cbtn{
+  height:54px;border-radius:13px;border:1px solid rgba(137,180,255,.12);
+  background:rgba(23,49,94,.5);color:var(--text);
+  font-size:20px;font-weight:800;cursor:pointer;
+  user-select:none;transition:opacity .12s,transform .1s;
+}
+.cbtn:active{opacity:.6;transform:scale(.95);}
+.cbtn.op{background:rgba(2,119,189,.55);color:#fff;}
+.cbtn.eq{background:#c2185b;color:#fff;grid-column:span 2;}
+
+/* ═══════════════════════════════════
+   TOAST
+═══════════════════════════════════ */
+.toast{
+  position:fixed;bottom:calc(var(--nav) + var(--safe-b) + 16px);
+  left:50%;transform:translateX(-50%) translateY(8px);
+  background:rgba(5,18,50,.96);border:1px solid var(--lemon);color:var(--text);
+  padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;
+  white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.offline-tag{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + 4px);
+  right:12px;z-index:600;
+  background:rgba(255,100,133,.18);border:1px solid rgba(255,100,133,.3);
+  border-radius:8px;padding:4px 9px;font-family:var(--mono);font-size:10px;
+  font-weight:700;color:var(--red);display:none;
+}
+.offline-tag.show{display:block;}
+/* search */
+.search-wrap{position:relative;margin-bottom:14px;}
+.search-wrap .inp{padding-left:38px;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;pointer-events:none;}
+
+/* score bar */
+.score-bar-wrap{margin-top:8px;background:rgba(3,15,39,.6);border-radius:20px;height:6px;overflow:hidden;border:1px solid rgba(132,176,255,.1);}
+.score-bar{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--red),var(--amber));animation:scoreGrow .8s cubic-bezier(.2,.8,.4,1) both;}
+
+/* product card in scan result */
+.prod-card-result{
+  border-radius:16px;padding:16px 18px;margin:0 16px 10px;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(18px);animation:scIn .35s cubic-bezier(.34,1.4,.64,1) both;
+}
+.prod-card-result.ok{background:linear-gradient(140deg,rgba(29,105,100,.28),rgba(8,35,66,.8));border:1px solid rgba(54,214,160,.4);}
+.prod-card-result.warning{background:linear-gradient(140deg,rgba(123,83,28,.26),rgba(29,36,65,.8));border:1px solid rgba(255,199,106,.44);animation:scIn .35s cubic-bezier(.34,1.4,.64,1) both,glowA 3s 1s infinite;}
+.prod-card-result.expired{background:linear-gradient(140deg,rgba(127,39,69,.32),rgba(32,23,59,.82));border:1px solid rgba(255,100,133,.5);animation:scIn .35s cubic-bezier(.34,1.4,.64,1) both,glowR 2.5s 1s infinite;}
+.prod-card-result.unmatched{background:rgba(25,41,72,.55);border:1px dashed rgba(255,199,106,.38);}
+.pname{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.25;margin-bottom:3px;}
+.pbrand{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:12px;}
+.pexp-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 13px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:12px;
+}
+.pexp-ok{color:var(--leaf);background:rgba(54,214,160,.13);}
+.pexp-warn{color:#FFD18A;background:rgba(255,199,106,.13);animation:badgePulse 2s infinite;}
+.pexp-exp{color:#FF8BA3;background:rgba(255,100,133,.14);animation:badgePulse 1.5s infinite;}
+.pexp-none{color:var(--muted);background:rgba(143,169,211,.08);}
+.fields-mini{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.fmini{background:rgba(3,15,39,.38);border:1px solid rgba(132,176,255,.14);border-radius:9px;padding:7px 10px;}
+.fmini-k{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px;}
+.fmini-v{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);word-break:break-all;}
+.fmini.hl{border-color:rgba(113,149,255,.3);}
+.fmini.hl .fmini-v{color:var(--lemon);}
+
+/* nrt warning */
+.nrt-warn{margin:0 16px 10px;padding:9px 13px;background:rgba(255,100,133,.1);border:1px solid rgba(255,100,133,.28);border-radius:10px;color:var(--red);font-weight:800;font-size:12px;}
+
+/* unmatched */
+.unmatched-lbl{font-size:13px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:7px;}
+
+/* ═══════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════ */
+@media(max-width:360px){
+  .stats-row{grid-template-columns:repeat(3,1fr);}
+  .stat-val{font-size:18px;}
+  .quick-grid{gap:8px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-mark">P</div>
+    <div>
+      <div class="header-name">PharmaTrack</div>
+      <div class="header-sub" id="storeLbl">Boots T3 · BOO · 331356</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-clock" id="liveClock">00:00</div>
+    <button class="hbtn" onclick="toggleTheme()" title="Theme">🌓</button>
+  </div>
+</header>
+
+<!-- ── PAGES ── -->
+<div class="pages">
+
+<!-- ▌PAGE 1 — HOME ▐ -->
+<div class="page active" id="pg-home">
+  <div class="stats-row">
+    <div class="gc stat-card"><div class="stat-val" id="hStat0" style="color:var(--lemon)">0</div><div class="stat-lbl">Products</div></div>
+    <div class="gc stat-card"><div class="stat-val" id="hStat1" style="color:var(--amber)">0</div><div class="stat-lbl">Expiring</div></div>
+    <div class="gc stat-card"><div class="stat-val" id="hStat2" style="color:var(--red)">0</div><div class="stat-lbl">Expired</div></div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="gc quick-card" style="--card-c:rgba(113,149,255,.15)" onclick="goPage('scanner');setTimeout(startScan,300)">
+      <div class="quick-icon">📷</div>
+      <div class="quick-title">Quick Scan</div>
+      <div class="quick-sub">GS1 · EAN · GTIN</div>
+    </div>
+    <div class="gc quick-card" onclick="goPage('scanner')">
+      <div class="quick-icon">⬡</div>
+      <div class="quick-title">Manual Entry</div>
+      <div class="quick-sub">Type barcode</div>
+    </div>
+    <div class="gc quick-card" onclick="goPage('planner')">
+      <div class="quick-icon">📦</div>
+      <div class="quick-title">Planogram</div>
+      <div class="quick-sub">Shelf view</div>
+    </div>
+    <div class="gc quick-card" onclick="goPage('kpi')">
+      <div class="quick-icon">📊</div>
+      <div class="quick-title">KPI Tracker</div>
+      <div class="quick-sub">Hourly sales</div>
+    </div>
+  </div>
+
+  <div class="sec-title" style="margin-bottom:10px;">Recent Scans</div>
+  <div class="recent-list" id="recentList">
+    <div class="hist-empty" style="text-align:center;padding:32px 0;color:var(--muted);">
+      <div style="font-size:32px;opacity:.5;margin-bottom:6px;">📋</div>
+      <div style="font-size:13px;">No scans yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- ▌PAGE 2 — KPI ▐ -->
+<div class="page" id="pg-kpi">
+  <div class="sec-title">Hourly Sales Tracker</div>
+  <div class="gc" style="overflow:hidden;margin-bottom:14px;animation:fsu .4s ease both;">
+    <div id="kpiSlots"></div>
+    <div class="kpi-total-bar" id="kpiTotals">
+      <div class="kpi-tot-item"><div class="kpi-tot-val" id="ktSale">0</div><div class="kpi-tot-lbl">Sales</div></div>
+      <div class="kpi-tot-item"><div class="kpi-tot-val" id="ktTrn">0</div><div class="kpi-tot-lbl">TRN</div></div>
+      <div class="kpi-tot-item"><div class="kpi-tot-val" id="ktAtv" style="color:var(--teal)">0.0</div><div class="kpi-tot-lbl">ATV</div></div>
+      <div class="kpi-tot-item"><div class="kpi-tot-val" id="ktNo7" style="color:var(--leaf)">0.0%</div><div class="kpi-tot-lbl">No7%</div></div>
+      <div class="kpi-tot-item"><div class="kpi-tot-val" id="ktAura" style="color:var(--amber)">0.0%</div><div class="kpi-tot-lbl">Aura%</div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-ghost btn-sm" onclick="exportKpiCSV()">⬇ Export CSV</button>
+    <button class="btn btn-danger btn-sm" onclick="resetKpi()">Reset Day</button>
+  </div>
+</div>
+
+<!-- ▌PAGE 3 — SCANNER ▐ -->
+<div class="page" id="pg-scanner">
+  <div class="gc" style="padding:16px;margin-bottom:14px;animation:fsu .4s ease both;">
+    <div class="sec-title">GS1 Scanner</div>
+    <div class="scanner-frame">
+      <div class="scan-placeholder" id="scanPlaceholder">
+        <div class="scan-placeholder-icon">⬡</div>
+        <div>Tap Start Scan</div>
+      </div>
+      <div id="gs1Reader"></div>
+      <div class="viewfinder" id="viewfinder"><div class="vf-box"><div class="scan-line"></div></div></div>
+    </div>
+    <div class="inp-row">
+      <input class="inp" type="text" id="manualInp" placeholder="GS1 · GTIN · RMS · barcode…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-primary btn-sm" id="manualBtn">→</button>
+    </div>
+    <div class="scan-btn-grid">
+      <button class="btn btn-primary" id="startBtn">📷 Start Scan</button>
+      <button class="btn btn-danger hidden" id="stopBtn">⏹ Stop</button>
+      <button class="btn btn-ghost" id="sampleBtn">⬡ Sample</button>
+      <button class="btn btn-ghost" id="exportHistBtn">⬇ Export</button>
+    </div>
+  </div>
+
+  <div class="hist-wrap">
+    <div class="hist-hdr">
+      <div class="sec-title" style="margin-bottom:0;font-size:9px;">Scan History</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" id="searchToggleBtn">🔍</button>
+        <button class="btn btn-danger btn-sm" id="clearHistBtn">🗑</button>
+      </div>
+    </div>
+    <div id="histSearchWrap" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border);">
+      <input class="inp" id="histSearch" placeholder="Search…" style="padding:8px 12px;">
+    </div>
+    <div class="hist-list" id="histList">
+      <div class="hist-empty" id="histEmpty">
+        <div style="font-size:28px;opacity:.5;margin-bottom:6px;">📋</div>
+        <div>No scans yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ▌PAGE 4 — PLANNER ▐ -->
+<div class="page" id="pg-planner">
+  <div class="sec-title">Shelf Planogram · Boots T3</div>
+  <div class="sbar" id="sectionBar">
+    <button class="sbar-btn active" data-sec="all" onclick="filterSection('all',this)">All</button>
+    <button class="sbar-btn" data-sec="Joint" onclick="filterSection('Joint',this)">Joint &amp; Bone</button>
+    <button class="sbar-btn" data-sec="Omega" onclick="filterSection('Omega',this)">Omega</button>
+    <button class="sbar-btn" data-sec="Weight" onclick="filterSection('Weight',this)">Weight</button>
+    <button class="sbar-btn" data-sec="Sleep" onclick="filterSection('Sleep',this)">Sleep &amp; Relax</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="inp" id="plannerSearch" placeholder="Search product, barcode, shelf…">
+  </div>
+  <div id="plannerList"></div>
+</div>
+
+</div><!-- /pages -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="bnav">
+  <button class="bnav-btn active" id="bnav-home" onclick="goPage('home')"><span class="bi">🏠</span>Home</button>
+  <button class="bnav-btn" id="bnav-kpi"    onclick="goPage('kpi')"><span class="bi">📊</span>KPI</button>
+  <button class="bnav-btn" id="bnav-scanner" onclick="goPage('scanner')"><span class="bi">📷</span>Scan</button>
+  <button class="bnav-btn" id="bnav-planner" onclick="goPage('planner')"><span class="bi">📦</span>Planner</button>
+</nav>
+
+</div><!-- /app -->
+
+<!-- ── SCAN RESULT SHEET ── -->
+<div class="sheet-overlay" id="rsOverlay">
+  <div class="sheet" id="rsSheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-head">
+      <div class="sheet-status">
+        <span id="rsIcon">✅</span>
+        <span id="rsStatus" style="color:var(--leaf)">PRODUCT FOUND</span>
+      </div>
+      <button class="sclose" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="match-steps" id="matchSteps"></div>
+    <div id="rsExpiryAlert" class="exp-alert" style="display:none"></div>
+    <div id="rsNrtWarn" class="nrt-warn" style="display:none">🚫 NON-RETURNABLE PRODUCT</div>
+    <!-- Product result card -->
+    <div id="rsProdCard" class="prod-card-result ok" style="display:none">
+      <div class="pname" id="rsPname">—</div>
+      <div class="pbrand" id="rsPbrand">—</div>
+      <div class="pexp-badge pexp-none" id="rsExpBadge">— No expiry data</div>
+      <div class="fields-mini">
+        <div class="fmini hl"><div class="fmini-k">RMS</div><div class="fmini-v" id="rfRms">—</div></div>
+        <div class="fmini hl"><div class="fmini-k">GTIN</div><div class="fmini-v" id="rfGtin">—</div></div>
+        <div class="fmini hl"><div class="fmini-k">Batch</div><div class="fmini-v" id="rfBatch">—</div></div>
+        <div class="fmini"><div class="fmini-k">Shelf</div><div class="fmini-v" id="rfShelf">—</div></div>
+        <div class="fmini"><div class="fmini-k">Facings</div><div class="fmini-v" id="rfFacing">—</div></div>
+        <div class="fmini"><div class="fmini-k">Section</div><div class="fmini-v" id="rfSection">—</div></div>
+        <div class="fmini"><div class="fmini-k">Match Via</div><div class="fmini-v" id="rfMethod">—</div></div>
+        <div class="fmini"><div class="fmini-k">Units</div><div class="fmini-v" id="rfUnits">—</div></div>
+      </div>
+    </div>
+    <!-- Unmatched -->
+    <div id="rsUnmatched" style="display:none;margin:0 16px 10px;padding:14px;background:rgba(25,41,72,.55);border:1px dashed rgba(255,199,106,.38);border-radius:14px;">
+      <div class="unmatched-lbl">⚠ Unmatched Product</div>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7;">No match found. Manual entry required.</p>
+      <div id="rsScoreWrap" style="display:none;margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);" id="rsScoreLbl">Best: 0%</div>
+        <div class="score-bar-wrap"><div class="score-bar" id="rsScoreBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Expiry + Batch form -->
+    <div class="rs-sec">
+      <div class="rs-title">📅 Expiry &amp; Batch</div>
+      <div class="rs-grid">
+        <div class="rs-fld">
+          <div class="rs-lbl">Expiry YYMMDD</div>
+          <input class="rs-inp" id="rsExpiry" placeholder="YYMMDD" maxlength="6" inputmode="numeric">
+          <div class="exp-prev" id="rsExpPrev"></div>
+        </div>
+        <div class="rs-fld">
+          <div class="rs-lbl">Batch No</div>
+          <input class="rs-inp" id="rsBatch" placeholder="Batch" maxlength="20">
+        </div>
+      </div>
+    </div>
+    <div class="rs-sec">
+      <div class="rs-title">📊 Quantity</div>
+      <div class="qty-row">
+        <button class="qadjbtn" onclick="qtyAdj(-1)">−</button>
+        <input type="number" id="rs-qty" value="1" min="1">
+        <button class="qadjbtn" onclick="qtyAdj(1)">+</button>
+      </div>
+    </div>
+    <div class="rs-actions">
+      <button class="btn btn-primary" id="rsSaveBtn">💾 Save to History</button>
+      <button class="btn" id="rsAddMasterBtn" style="display:none;background:rgba(54,214,160,.14);border:1px solid rgba(54,214,160,.28);color:var(--leaf);font-weight:700;">➕ Add to Master &amp; Save</button>
+      <button class="btn btn-ghost" onclick="closeSheet()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CALC SHEET ── -->
+<div class="calc-overlay" id="calcOverlay">
+  <div class="calc-sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:800;" id="calcTitle">Enter Value</div>
+      <button style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;" onclick="closeCalc()">✕</button>
+    </div>
+    <div class="calc-display">
+      <div class="calc-formula" id="cFormula"></div>
+      <div class="calc-main" id="cMain">0</div>
+    </div>
+    <div class="calc-grid">
+      <button class="cbtn" onclick="cp('7')">7</button><button class="cbtn" onclick="cp('8')">8</button><button class="cbtn" onclick="cp('9')">9</button><button class="cbtn op" onclick="cp('-')">-</button>
+      <button class="cbtn" onclick="cp('4')">4</button><button class="cbtn" onclick="cp('5')">5</button><button class="cbtn" onclick="cp('6')">6</button><button class="cbtn op" onclick="cp('+')">+</button>
+      <button class="cbtn" onclick="cp('1')">1</button><button class="cbtn" onclick="cp('2')">2</button><button class="cbtn" onclick="cp('3')">3</button><button class="cbtn op" onclick="cp('C')">C</button>
+      <button class="cbtn" onclick="cp('0')">0</button><button class="cbtn" onclick="cp('.')">.</button>
+      <button class="cbtn eq" onclick="cp('=')">SAVE =</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="offline-tag" id="offlineTag">📴 Offline</div>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+'use strict';
+/* ═══════════════════════════════════════════
+   PLANOGRAM MASTER DATA (Boots T3 Arrivals)
+   [barcode, alshayaCode, desc, facing, units, shelf, section]
+═══════════════════════════════════════════ */
+const PD=[
+['819247010020','B2BOB247010020','BLOOM & QUAINT FLEXIMOVE 100 TAB',1,4,'1.1','Joint'],
+['740985226230','WOBO WOMTC22623','21ST CENTURY ARTHRI-FLEX TABS 120S',1,4,'1.1','Joint'],
+['5021265222544','WEBO WEJOIN254','VITABIOTICS JOINTACE MAX 84S TABS',1,14,'1.1','Joint'],
+['5021265222421','WEBO WEMMS0005','VITABIOTICS JOINTACE CHON 30S',1,9,'1.1','Joint'],
+['30768330491','220165026','SD OSTEO BI FLEX JOINT HEALTH TAB 30S',1,4,'1.1','Joint'],
+['850007144142','130393707','PHARMAXXI MAXXI FLEX 60 CAPSULES',1,4,'1.1','Joint'],
+['9421035370127','345040231','SRW SKLI JOINT CAPS 60S',1,5,'1.1','Joint'],
+['676194990528','337213289','KEENVITA MOVFLEX JOINT CARE 120 TAB',1,4,'1.1','Joint'],
+['9650364002465','B2BOB2A3025ML','CH ALPHA 30X25ML',1,4,'1.2','Joint'],
+['4260133180949','273794953','CH ALPHA PLUS 30X25ML',1,2,'1.2','Joint'],
+['4260133180390','B2BOB23180390','CH ALPHA SPORT 25ML 30S',1,2,'1.2','Joint'],
+['8410885083135','WCBO WC5083135','MARNY\'S ARTROHELP FORTE 200ML',1,4,'1.2','Joint'],
+['7350122360661','339869972','SWEDISH NUTRA COLLAGEN JOINT AMPOULES 20S',1,2,'1.3','Joint'],
+['5903163602034','129841893','ACTIVLAB COLLAGEN JOINT & BODY',1,2,'1.3','Joint'],
+['5021265227471','WOBO WOMV217','VITABIOTICS OSTEOCARE GLUCOSAMINE 60S',1,7,'1.3','Joint'],
+['727783004079','220054236','NEW CHAPTER BONE STRENGTH 60S',1,4,'1.3','Joint'],
+['733739031709','WOBO WO3170','NOW GLUCOSAMINE CHOND MSM 90 CAP',1,4,'1.3','Joint'],
+['5019781017256','346164252','HEALTH AID OSTEZOIN TAB 90S',1,5,'1.3','Joint'],
+['699866068448','ZIBOZI699866068325','FLEXAMIN TABS 120+40S',1,4,'1.3','Joint'],
+['699866068417','ZIBOZI699866068301','FLEXAMIN TABS 60+20S',1,4,'1.3','Joint'],
+['699866148461','ZIBOZINB 14846','FLEXAMIN TRIPLE STRENGTH TABS',1,4,'1.3','Joint'],
+['733739016256','WOBO WO1625','NOW KRILL OIL 500MG 60S',1,5,'1.3','Joint'],
+['5021265245871','WOBO WOMV071','OSTEOCARE TAB 30S',1,12,'1.4','Joint'],
+['76280413540','B2BOB20413540','SOLARAY CALCIUM MAG & ZINC 100 CAPS',1,4,'1.4','Joint'],
+['33984005204','220221835','SOLGAR CALCI MAGNESIUM+ZINC TAB 100S',1,4,'1.4','Joint'],
+['5019781026036','220160905','HEALTH AID MAGCITRA TABS 60S',1,7,'1.4','Joint'],
+['74312142901','345560411','PURITANS PRIDE CALCIUM MAGNESIUM ZINC 100S',1,9,'1.4','Joint'],
+['850007144272','339491220','PHARMAXXI BERBERINE 600MG TABS 30',1,4,'1.4','Joint'],
+['670480101308','342714921','ENZYMEDICA BERBERINE PHYTOSOME 60 CAPS',1,4,'1.4','Joint'],
+['740985223260','WOBO WOMTC22326','21ST CENTURY CALCIUM PLUS CAP',1,8,'1.4','Joint'],
+['645638525930','342164566','VITALSHIELD BONE SUPPORT EFF TAB 20S',1,9,'1.4','Joint'],
+['859795006236','B2BOB2121786','SUNSHINE N CAL WITH VIT D3 TAB 100S',1,5,'1.4','Joint'],
+['740985224885','WOBO WOMTC22488','21ST GLUCOSAMINE & CHONDROITIN PLUS 60S',1,6,'1.4','Joint'],
+['740985222638','WOBO WOMTC22263','21ST CALMAGZINC+D TABS 90S',1,6,'1.4','Joint'],
+['5021265220403','WOBO WOVITA0430','VITABIOTICS OSTEOCARE CHEWABLE',1,7,'1.5','Joint'],
+['5021265222902','WOBO WOOSTEO2902','VITABIOTICS OSTEOCARE FIZZ 20S',1,2,'1.5','Joint'],
+['33674102343','220158483','NWAY ALIVE CALCIUM GUMMIES 60S',1,5,'1.5','Joint'],
+['74312042904','ZIBOZI2042904','NB CAL MAG ZINC CHELATED TABS',1,5,'1.5','Joint'],
+['628069520200','335739891','OH MY OH CALCIUM AND VIT D3 GUMMIES 350G',1,4,'1.5','Joint'],
+['645638526074','342149567','VITALSHIELD MAG D EFF TAB 20S',1,9,'1.5','Joint'],
+['5021265227297','WOBO WONCM0001','VITABIOTICS OSTEOCARE SYRUP 200ML',1,6,'1.5','Joint'],
+['5024874015101','XPBOXP VALU488','VALUPAK CA +VIT D 30 TAB',1,5,'1.5','Joint'],
+['33984005181','347808865','SOLGAR CALC MAG W VIT D3 TAB 150S',1,5,'1.5','Joint'],
+['33984007000','220095571','SOLGAR CHELATED MAGNESIUM TAB 100S',1,6,'1.5','Joint'],
+['859795006229','B2BOB2121785','SUNSHINE N CAL MAG ZINC WITH VIT D3 100S',1,4,'1.5','Joint'],
+['33984013162','220223460','SOLGAR GLUC HYLACD COND MSM TAB 60S',1,5,'1.5','Joint'],
+['733739003652','WOBO WO365','NOW VITAMIN D 1000IU 180S',1,5,'1.6','Joint'],
+['74312142307','WMBOWM4230','PURITANS PRIDE CALC 600+VITD 60',1,5,'1.6','Joint'],
+['733739003690','WOBO WO003690','NOW VITAMIN D3/K2 1000IU 120CAPS',1,5,'1.6','Joint'],
+['33984036031','347769059','SOLGAR VIT K2 100MCG CAP 50S',1,6,'1.6','Joint'],
+['33984358720','220077915','SOLGAR VD-3 10000IU SOFTGELS 120S',1,6,'1.6','Joint'],
+['33984033160','347823893','SOLGAR VIT D3 2200IU CAP 50S',1,8,'1.6','Joint'],
+['8684556261058','347809060','YOUR GUMMIES VITAMIN D3 K2 GUMMIES 60S',1,5,'1.6','Joint'],
+['5019781010424','220220161','HEALTH AID VITAMIN D3 1000IU CAPS 30S',2,10,'1.6','Joint'],
+['5024874032061','B2BOB24032061','VALUPAK VITAMIN-D3 1000IU TAB 60S',2,10,'1.6','Joint'],
+['740985270622','WOBO WO27062','21ST CENTURY D-1000IU TAB 110S',1,6,'1.6','Joint'],
+['33984033405','220192674','SOLGAR VD 1000IU CHOLECALCIFEROL 100SGEL',1,5,'1.6','Joint'],
+['5021265247950','130403642','VITABIOTICS ULTRA VITAMIN D3 4000IU 96 TABS',2,38,'1.7','Joint'],
+['5021265247400','WOBO WO5247400','VITABIOTICS ULTRA VIT D3 2000IU 96 TABS',2,18,'1.7','Joint'],
+['35046067007','B2BOB246067007','SUNSHINE SUPER VIT-D3 2000IU 60TABS',1,5,'1.7','Joint'],
+['850007144289','339516166','PHARMAXXI DK3 D2 4000IU K2 MK7 CAPS 30S',1,6,'1.7','Joint'],
+['8410885095169','341754588','MARNY\'S VITAMIN D 4000IU CAPS 120S',1,7,'1.7','Joint'],
+['3760162577402','346457179','ERIC FAVRE DROPS VITAMIN D3 20ML',1,9,'1.7','Joint'],
+['628069520446','347171085','OH MY OH LIPOSOMAL VITAMIN D3 K2 15ML',1,9,'1.7','Joint'],
+['628069520163','335774930','OH MY OH VITAMIN D3 GUMMIES 350G',1,4,'1.7','Joint'],
+['835776001308','220239985','TRQ VITAMIN D3 BONE 60 GUMMIES',1,5,'1.7','Joint'],
+['676194990535','337213286','KEENVITA OMEGA 3 2000MG 120 TAB',1,4,'2.2','Omega'],
+['733739107596','WOBO WONOW596','NOW OMEGA 3 1000MG 100S',1,4,'2.2','Omega'],
+['609788968184','220231423','AMS OMEGA 3 1000MG 60CT SOFTGELS',1,4,'2.2','Omega'],
+['645638525404','ZWBOZW8525404','NF HIGH QUALITY OMEGA-3 1000MG',1,5,'2.2','Omega'],
+['33984020283','347754201','SOLGAR OMEGA 1300MG SOFTGEL 120S',1,5,'2.2','Omega'],
+['33984020580','220064872','SOLGAR OMEGA-3 950MG 100SGEL',1,3,'2.2','Omega'],
+['740985271292','220172425','21ST CENTURY ALASKA WILD FISH OIL 90SG',1,3,'2.2','Omega'],
+['859795006113','B2BOB25006113','SUNSHINE N OMEGA 3 950MG 100SG',1,4,'2.2','Omega'],
+['733739016614','342704906','NOW ULTRA OMEGA 3 FISH OIL 90S',1,4,'2.2','Omega'],
+['33984017887','B2BOB24017887','SOLGAR OMEGA 3 FISH OIL CON SG 120S',1,4,'2.2','Omega'],
+['768990017902','WOBO WO0017902','NORD NAT ULTIMATE OMEGA 60SG',1,4,'2.3','Omega'],
+['768990018015','WOBO WO0018015','NORD NAT COMPLETE OMEGA XTRA 60SG',1,4,'2.3','Omega'],
+['768990417603','WOBO WO0417603','NORD NAT OMEGA-3 FISH GELATIN 60SG',1,4,'2.3','Omega'],
+['857188004012','B2BOB28004012','WILEY\'S PEAK EPA SOFTGEL 30S',1,4,'2.3','Omega'],
+['727783900289','B2BOB23900289','NEW CHAPTER WHOLEMEGA 1000MG 60SG',1,4,'2.3','Omega'],
+['5019781028931','220154084','HEALTH AID OMEGAZONE PLUS CAPS 30S',1,4,'2.3','Omega'],
+['8410885095244','341769581','MARNY\'S OMEGAMAR 1500MG CAPS 60S',1,3,'2.3','Omega'],
+['733739016867','WOBO WO01686','NOW TRI-3D OMEGA 90S',1,4,'2.3','Omega'],
+['740985228746','WOBO WO22874','21ST CENTURY TRIPLE OMEGA COMPLEX 90S',1,6,'2.3','Omega'],
+['733739018397','WOBO WO18397','NOW SUPER OMEGA 369 1200MG 90S',2,8,'2.4','Omega'],
+['15794041207','B2BOB24041207','COUNTRY LIFE OMEGA 3 MOOD 90 SOFTGELS',2,8,'2.4','Omega'],
+['868573000199','B2BOB23000199','PHARMAXXI MAXXI OMEGA 3,6,7,9 60CAPS',2,10,'2.4','Omega'],
+['859795006106','B2BOB2121782','SUNSHINE N ORG FLAXSEED OIL OMEGA 3-6-9 100S',2,8,'2.4','Omega'],
+['15794041009','B2BOB24041009','COUNTRY LIFE OMEGA 369 90 SOFTGELS',2,8,'2.4','Omega'],
+['733739017437','WOBO WO39017437','NOW COD LIVER OIL EXT STRN 90 SGEL',1,4,'2.5','Omega'],
+['859795006137','B2BOB2121783','SUNSHINE N COD LIVER OIL SG 100S',2,10,'2.5','Omega'],
+['768990017612','WOBO WO0017612','NORD NAT OMEGA-3D 60SG CAPS',1,4,'2.5','Omega'],
+['628069520248','335754669','OH MY OH OMEGA AND DHA GUMMIES 350G',1,4,'2.5','Omega'],
+['628069520439','347220376','OH MY OH LIPOSOMAL ALA OMEGA 3 15ML',1,9,'2.5','Omega'],
+['733739018076','WOBO WO39018076','NOW ODORLESS GARLIC 100 SGEL',1,5,'2.5','Omega'],
+['7640162325493','335504566','SWISS ENERGY BLACK GARLIC SOFT GELS 20S',1,7,'2.5','Omega'],
+['5021265221608','220226535','CARDIOCACE CAPSULES 30S',1,9,'2.5','Omega'],
+['5903163605912','337233148','WHITE HEALTH COQ10 30S TAB',1,6,'2.5','Omega'],
+['850007144258','339529551','PHARMAXXI TRANS RESVERATROL 600MG 30S',2,8,'2.5','Omega'],
+['740985223611','WOBO WOMTC22361','21ST CENTURY HERBAL SLIMMING TEA HONEY 24',2,10,'W1.1','Weight'],
+['740985224052','WOBO WOMTC22405','21ST CENTURY HERBAL SLIMMING TEA ORANGE 24',2,10,'W1.1','Weight'],
+['740985227909','WOBO WOMTC22790','21ST CENTURY HERBAL SLIMMING TEA GREEN 24',2,10,'W1.1','Weight'],
+['740985223994','WOBO WOTEA994','HERBAL SLIMMING TEA NATURAL 24 BAGS',1,5,'W1.1','Weight'],
+['83000164569','B2BOB20164569','NATURES ANSWER NUTRATRIM MAX 180 CAPS',1,4,'W1.2','Weight'],
+['5903163601617','B2BOB23601617','PAXAS BELLY FAT 120 CAPS',2,8,'W1.2','Weight'],
+['8684556261003','347628802','OUR GUMMIES APPLE CIDER VINEGAR 60S',2,8,'W1.2','Weight'],
+['868573000106','B2BOB273000106','PHARMAXXI WEIGHT LOSS 4 90TABS',2,8,'W1.2','Weight'],
+['819247010051','B2BOB27010051','BLOOM & QUAINT EASY SLIM 60CAP',2,14,'W1.2','Weight'],
+['5903163608531','344535280','WHITE HEALTH SLIM DETOX CAPS 30S',2,16,'W1.3','Weight'],
+['628069520262','335754670','OH MY OH APPLE CIDER VINEGAR GUMMIES 350G',2,2,'W1.3','Weight'],
+['810011080911','B2BOB21080911','NUTRITION LAB APPLE CIDER VINEGAR TAB 100S',2,14,'W1.3','Weight'],
+['639738171227','ZIBOZI8171227','TG APPLE CIDER VINEGAR GUMMY ADULTS',2,8,'W1.3','Weight'],
+['35046068714','B2BOB246068714','GARDEN GREEN ACAICLEANSE 48H DETOX 947ML',3,6,'W1.4','Weight'],
+['9354693002188','345045196','EIMELE CALIBRATE REDS 2G POWDER 30S',2,14,'W1.4','Weight'],
+['8410885095237','341774563','MARNY\'S CARNITINE 3000MG 25ML VIALS 14S',4,4,'W1.5','Weight'],
+['74312016837','ZIBOZINB837','NB L CARNITINE 500MG 30TAB',4,24,'W1.5','Weight'],
+['733739110466','WOBO WO41210072','NOW L-CARNITINE 500MG 60 VCAPS',3,15,'W1.5','Weight'],
+['733739014351','220154604','NOW GARCINIA 1000MG 120TABS',3,12,'W1.5','Weight'],
+['5019781016853','274249438','HEALTH AID CARBOSLIM CAPS 60S',3,9,'W2.2','Weight'],
+['5019781010318','XABOXA61010318','HEALTH AID SIBERSLIM TABS 60S',3,15,'W2.2','Weight'],
+['5019781020256','220165367','HEALTH AID CROMIUM TAB 60S',3,15,'W2.2','Weight'],
+['7431201108','220220534','NB CHELATED POTASSIUM 100S',3,18,'W2.2','Weight'],
+['5903163602416','130322638','PAXAS SLIMMING TABS 20 EFFERVESCENT',4,28,'W2.3','Weight'],
+['810011082892','B2BOB21062892','SUNSHINE N SLIM SUPPORT EFFERV TABS 20S',3,21,'W2.3','Weight'],
+['854936003129','B2BOB236003129','BIO N MORINGA SUPER FOOD 60S CAPS',3,12,'W2.3','Weight'],
+['628069520491','347278975','OH MY OH LIPOSOMAL MCT KETO SMOOTHIE 15ML',2,18,'W2.4','Weight'],
+['628069520422','347273522','OH MY OH LIPOSOMAL TURMERIC CURCUMIN 15ML',2,18,'W2.4','Weight'],
+['733739046383','220161425','NOW CURCUMIN TURMERIC 60CAP',2,12,'W2.4','Weight'],
+['33984041615','220226685','SOLGAR TURMERIC ROOT CAPS 60S',2,10,'W2.4','Weight'],
+['33984022607','220187900','SOLGAR POTASSIUM TABS 100S',2,10,'W2.4','Weight'],
+['5019781022519','341129634','HEALTHAID L ARGININE 500MG TAB 60S',3,12,'W2.4','Weight'],
+['5045098421080','BZBTS84-21-080','BOT AROMA ESSENTIAL OIL EUCALYPTUS 10ML',2,2,'S1.0','Sleep'],
+['5045098421073','BZBTS84-21-072','BOT AROMA ESSENTIAL OIL TEA TREE 10ML',2,2,'S1.0','Sleep'],
+['5045098421059','BZBTS84-21-056','BOT AROMA ESSENTIAL OIL LAVENDER 10ML',2,2,'S1.0','Sleep'],
+['5045098421035','BZBTS84-21-102','BOT AROMA BASE MASSAGE OIL 100ML',2,2,'S1.0','Sleep'],
+['5045098421158','BZBTS84-21-153','BOT AROMA MASSAGE OIL YLANG YLANG 100ML',1,8,'S1.0','Sleep'],
+['733739077349','WOBO WO39077349','NOW ARGAN OIL ORGANIC 2OZ',1,1,'S1.0','Sleep'],
+['733739076250','WOBO WO9076250','NOW ESSENTIAL OIL TEA TREE 30ML',2,14,'S1.0','Sleep'],
+['733739075550','WOBO WO9075550','NOW SOLUTIONS JASMINE FRAGRANCE 30ML',2,14,'S1.1','Sleep'],
+['733739075604','WOBO WO9075604','NOW ESSENTIAL OIL LAVENDER 30ML',2,14,'S1.1','Sleep'],
+['733739075857','WOBO WO9075857','NOW ESSENTIAL OIL PEPPERMINT 30ML',2,14,'S1.1','Sleep'],
+['733739075659','WOBO WO9075659','NOW ESSENTIAL OIL LEMON 30ML',2,2,'S1.1','Sleep'],
+['733739075451','220240009','NOW EUCALYPTUS OIL 30ML',2,18,'S1.1','Sleep'],
+['733739076007','332664345','NOW ROSEMARY OIL 30ML',2,18,'S1.1','Sleep'],
+['733739074607','332654327','NOW ROSEMARY OIL ORGANIC 30ML',2,18,'S1.1','Sleep'],
+['733739077172','WOBO WO39077172','NOW JOJOBA OIL 100 PURE 118ML',2,14,'S1.2','Sleep'],
+['733739076601','WOBO WO39076601','NOW SWEET ALMOND OIL 118ML',2,2,'S1.2','Sleep'],
+['733739076700','WOBO WO39076700','NOW AVOCADO OIL 100 PURE 118ML',2,2,'S1.2','Sleep'],
+['733739077035','WOBO WO9077035','NOW LIQUID COCONUT OIL 473ML',2,8,'S1.2','Sleep'],
+['733739076830','WOBO WO39076830','NOW COCONUT OIL 7FL OZ',2,6,'S1.2','Sleep'],
+['733739077585','WOBO WO39077585','NOW SHEA BUTTER NATURAL 7FL OZ',1,1,'S1.2','Sleep'],
+['5903163605677','338384139','WHITE HEALTH MAGNESIUM GLYCINATE 400MG 60CAPS',2,6,'S1.3','Sleep'],
+['676194993543','337218255','KEENVITA MAGNESIUM GLYCENATE 60 TAB',2,8,'S1.3','Sleep'],
+['733739023902','342714913','NOW MAGTEIN 90 VEG CAPS',2,8,'S1.3','Sleep'],
+['733739012890','335910099','NOW MAGNESIUM GLYCINATE 100MG 180 TABS',2,8,'S1.3','Sleep'],
+['878941008146','344285307','TRACE MAGNESIUM GLYCINATE 120MG CAPS 90S',2,10,'S1.4','Sleep'],
+['878941000256','344360162','TRACE MEGA MAG 400MG 118ML',2,14,'S1.4','Sleep'],
+['878941008405','344285310','TRACE LIQUID MAGNESIUM GLYCINATE 237ML',2,12,'S1.4','Sleep'],
+['878941008481','344365166','TRACE MAGNESIUM GLYCINATE POWDER 180G',2,16,'S1.4','Sleep'],
+['5019781056132','335439378','HEALTH AID MAGNESIUM BISGLYCINATE 375MG 60S',2,4,'S1.5','Sleep'],
+['727783902405','346336954','NEW CHAPTER MAGNESIUM ASHWAGANDHA 30TAB',2,10,'S1.5','Sleep'],
+['5024874016535','XPBOXP VALU493','VALUPAK MAGNESIUM 30 TAB',2,10,'S1.5','Sleep'],
+['850007144241','339516164','PHARMAXXI MAG 600MG CAPS 30S',2,8,'S1.5','Sleep'],
+['74312055355','ZIBOZI55355','NB MAGNESIUM 500MG 100TAB',2,10,'S1.5','Sleep'],
+['33984041325','347808863','SOLGAR GINKGO BILOBA 90MG CAP 180S',2,12,'S1.5','Sleep'],
+['859795006755','B2BOB25006755','SUNSHINE N MAGNESIUM 400MG 100TABS',2,8,'S1.6','Sleep'],
+['33984002005','347813886','SOLGAR VIT B COMPLEX W VIT C TAB 100S',2,10,'S1.6','Sleep'],
+['33984011496','220191933','SOLGAR VIT B COMPLEX 100 CAP 50S',2,10,'S1.6','Sleep'],
+['8901136824303','ZZBOZZ8833862','HIMALAYA STRESS WELLNESS ASHWAGANDHA 60CAPS',2,10,'S1.6','Sleep'],
+['9650142000007','Y5BOYSPSFM01','ADDITIVA MAGNESIUM EFF TAB 10',2,16,'S1.6','Sleep'],
+['5903163606490','347314048','PAXAS SERENITY SHOTS 60ML',2,14,'S1.6','Sleep'],
+['878941003310','344365168','TRACE CONCENTRACE IONIC FULVIC ACID 59ML',2,18,'S1.6','Sleep'],
+['72778302405','346336954','ASHWAGANDHA 30TAB',2,10,'S1.5','Sleep']
+];
+
+// Build master DB
+const MASTER_DB = PD.map(r=>({
+  gtin:normalizeGTIN(r[0]),
+  barcode:String(r[0]),
+  rms:String(r[1]),
+  description:r[2],
+  facing:r[3],
+  units:r[4],
+  shelf:r[5],
+  section:r[6],
+  policy: String(r[1]).includes('PHARMAXXI')||String(r[2]).includes('Expired')?'Non-RTV':'RTV Eligible'
+}));
+
+const SAMPLES=[
+  '(01)05021265247950(17)261231(10)VD4K25A',
+  '(01)05033984007000(17)251130(10)MGCHLB2',
+  '(01)00733739018076(17)240601(10)OLDBTCH',
+  '733739075604',
+  'WOBO WO9075604',
+  '5021265222544',
+  '(01)09999999999999(17)261231(10)UNKN001',
+];
+let sampleIdx=0;
+
+/* ═══════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════ */
+function lsGet(k,def){try{const r=localStorage.getItem(k);return r?JSON.parse(r):def;}catch{return def;}}
+function lsSet(k,v){
+  const d=document.getElementById('sync-dot');
+  try{localStorage.setItem(k,JSON.stringify(v));}catch{showToast('Storage full!');}
+}
+
+/* ═══════════════════════════════════════════
+   GS1 PARSER
+═══════════════════════════════════════════ */
+const AI_DEFS={'01':{n:'GTIN',l:14,f:true},'10':{n:'Batch',l:20,f:false},'11':{n:'ProdDate',l:6,f:true},'13':{n:'PackDate',l:6,f:true},'15':{n:'BestBefore',l:6,f:true},'17':{n:'Expiry',l:6,f:true},'21':{n:'Serial',l:20,f:false},'30':{n:'Qty',l:8,f:false},'00':{n:'SSCC',l:18,f:true}};
+
+function normalizeGTIN(g){if(!g)return'';const d=String(g).replace(/\D/g,'');return d.length<=14?d.padStart(14,'0'):d;}
+
+function parseGS1(raw){
+  if(!raw?.trim())return{ais:{},fmt:null,err:'Empty'};
+  const s=raw.trim();
+  if(s.includes('(')){
+    const ais={};const re=/\((\d{2,4})\)([^(]*)/g;let m,ok=false;
+    while((m=re.exec(s))!==null){if(AI_DEFS[m[1]]){ais[m[1]]={lbl:AI_DEFS[m[1]].n,val:m[2].trim()};ok=true;}}
+    return{ais,fmt:'GS1 Bracket',err:ok?null:'No AIs'};
+  }
+  if(s.includes('\x1D')||s.includes('~')){
+    const segs=s.replace(/~/g,'\x1D').split('\x1D').filter(Boolean);
+    const merged={};segs.forEach(sg=>Object.assign(merged,parsePlain(sg).ais));
+    return{ais:merged,fmt:'GS1-128/FNC1',err:Object.keys(merged).length?null:'No AIs'};
+  }
+  if(/^\d{8,14}$/.test(s))return{ais:{'01':{lbl:'GTIN',val:normalizeGTIN(s)}},fmt:'Plain GTIN/EAN',err:null};
+  return parsePlain(s);
+}
+function parsePlain(s){
+  const ais={};let pos=0;let ok=false;
+  while(pos<s.length){
+    let hit=false;
+    for(const len of[4,3,2]){
+      if(pos+len>s.length)continue;
+      const ai=s.substring(pos,pos+len);if(!AI_DEFS[ai])continue;
+      const def=AI_DEFS[ai];pos+=len;
+      if(def.f){const v=s.substring(pos,pos+def.l);if(v.length===def.l){ais[ai]={lbl:def.n,val:v};pos+=def.l;hit=ok=true;}}
+      else{const sep=s.indexOf('\x1D',pos);const v=sep===-1?s.substring(pos):s.substring(pos,sep);ais[ai]={lbl:def.n,val:v};pos=sep===-1?s.length:sep+1;hit=ok=true;}
+      break;
+    }
+    if(!hit)break;
+  }
+  return{ais,fmt:'Plain Concat',err:ok?null:'No AI structure'};
+}
+
+/* ═══════════════════════════════════════════
+   FUZZY MATCHING
+═══════════════════════════════════════════ */
+function lev(a,b){a=a.toLowerCase();b=b.toLowerCase();const m=a.length,n=b.length;const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);return dp[m][n];}
+function fuzzy(a,b){if(!a||!b)return 0;const ls=1-lev(a,b)/Math.max(a.length,b.length,1);const sA=new Set(a.toLowerCase().split(/\W+/).filter(Boolean));const sB=new Set(b.toLowerCase().split(/\W+/).filter(Boolean));const inter=[...sA].filter(x=>sB.has(x)).length;const union=new Set([...sA,...sB]).size;return .6*ls+.4*(union?inter/union:0);}
+
+/* ═══════════════════════════════════════════
+   TRIPLE-CHECK ENGINE
+═══════════════════════════════════════════ */
+const FT=0.85;
+function tripleCheck(ais,raw){
+  const rg=ais['01']?.val||'';const ng=normalizeGTIN(rg);const q=(raw||rg).trim();const steps=[];
+  let hit=ng?MASTER_DB.find(p=>p.gtin===ng):null;
+  if(hit)return{product:hit,steps:[{n:1,lbl:'GTIN Exact Match',pass:true}],score:1,method:'GTIN'};
+  steps.push({n:1,lbl:'GTIN Exact Match',pass:false});
+  const st=rg.replace(/^0+/,'');
+  hit=st?MASTER_DB.find(p=>p.gtin.replace(/^0+/,'')===st||p.barcode.replace(/^0+/,'')===st):null;
+  if(hit)return{product:hit,steps:[...steps,{n:2,lbl:'Normalised GTIN',pass:true}],score:1,method:'GTIN-NORM'};
+  steps.push({n:2,lbl:'Normalised GTIN',pass:false});
+  hit=MASTER_DB.find(p=>p.barcode===q||p.barcode===rg);
+  if(hit)return{product:hit,steps:[...steps,{n:3,lbl:'Barcode Fallback',pass:true}],score:1,method:'BARCODE'};
+  steps.push({n:3,lbl:'Barcode Fallback',pass:false});
+  hit=MASTER_DB.find(p=>p.rms.toLowerCase()===q.toLowerCase());
+  if(hit)return{product:hit,steps:[...steps,{n:4,lbl:'RMS Lookup',pass:true}],score:1,method:'RMS'};
+  steps.push({n:4,lbl:'RMS Lookup',pass:false});
+  let best=0,bProd=null,bFld='';
+  for(const p of MASTER_DB){for(const[v,f] of[[p.description,'Desc'],[p.rms,'RMS'],[p.barcode,'Barcode']]){const s=fuzzy(q,v);if(s>best){best=s;bProd=p;bFld=f;}}}
+  const pass=best>=FT;
+  steps.push({n:5,lbl:`Fuzzy ${bFld} — ${(best*100).toFixed(1)}%${pass?'':' (below 85%)'}`,pass});
+  return{product:pass?bProd:null,steps,score:best,method:pass?`FUZZY(${bFld})`:null};
+}
+
+/* ═══════════════════════════════════════════
+   EXPIRY HELPERS
+═══════════════════════════════════════════ */
+function parseExp(yymmdd){if(!yymmdd||yymmdd.length!==6)return null;const yy=parseInt(yymmdd.slice(0,2)),mm=parseInt(yymmdd.slice(2,4)),dd=parseInt(yymmdd.slice(4,6));const yr=yy<=49?2000+yy:1900+yy;const day=dd===0?new Date(yr,mm,0).getDate():dd;return new Date(yr,mm-1,day);}
+function expStatus(d){if(!d)return'none';const diff=(d-new Date())/86400000;if(diff<0)return'expired';if(diff<90)return'warning';return'ok';}
+function fmtExp(d){if(!d)return'—';return`${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+function expPrevText(val){
+  const p=document.getElementById('rsExpPrev');if(!p)return;
+  if(!val||val.length!==6){p.textContent='';return;}
+  const d=parseExp(val);if(!d){p.textContent='';return;}
+  const s=expStatus(d);
+  const c={expired:'var(--red)',warning:'var(--amber)',ok:'var(--leaf)',none:'var(--muted)'};
+  p.style.color=c[s];
+  const diff=Math.ceil((d-new Date())/86400000);
+  p.textContent=s==='expired'?`⚠ EXPIRED · ${fmtExp(d)}`:s==='warning'?`⚡ ${diff}d left · ${fmtExp(d)}`:`✓ Valid · ${fmtExp(d)}`;
+}
+
+/* ═══════════════════════════════════════════
+   SCAN HISTORY
+═══════════════════════════════════════════ */
+let scanHistory=[];
+let currentEntry=null;
+
+function renderHistory(filter=''){
+  const list=document.getElementById('histList');
+  const empty=document.getElementById('histEmpty');
+  let items=filter?scanHistory.filter(h=>(h.name||'').toLowerCase().includes(filter)||(h.rms||'').toLowerCase().includes(filter)||(h.gtin||'').toLowerCase().includes(filter)):scanHistory;
+  updateHomeStats();
+  if(!items.length){list.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  list.innerHTML=items.map((h,i)=>{
+    const d=parseExp(h.expiry||'');const s=expStatus(d);
+    const ic={'ok':'h-ok','warning':'h-warn','expired':'h-exp','none':'h-unk'}[s];
+    const em={'ok':'💊','warning':'⚡','expired':'⚠️','none':'📦'}[s];
+    const bc={'ok':'eb-ok','warning':'eb-warn','expired':'eb-exp'}[s]||'';
+    const el=d?`<span class="ebadge ${bc}">${s==='expired'?'EXP':s==='warning'?'⚡':'✓'} ${fmtExp(d)}</span>`:'';
+    return`<div class="hist-item" onclick="editHistItem(${scanHistory.indexOf(h)})">
+      <div class="h-icon ${ic}">${em}</div>
+      <div class="hist-info">
+        <div class="hist-name">${h.name||'Unknown'}</div>
+        <div class="hist-meta">${h.rms||'—'} · ${h.batch?'Batch: '+h.batch:'No batch'}</div>
+        <div class="hist-badges">${el}<span class="ebadge eb-qty">Qty: ${h.qty||1}</span>${h.matchMethod?`<span class="ebadge" style="background:rgba(167,139,250,.12);color:#a78bfa">${h.matchMethod}</span>`:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateHomeStats(){
+  let exp=0,warn=0;
+  scanHistory.forEach(h=>{const d=parseExp(h.expiry||'');const s=expStatus(d);if(s==='expired')exp++;if(s==='warning')warn++;});
+  document.getElementById('hStat0').textContent=MASTER_DB.length;
+  document.getElementById('hStat1').textContent=warn;
+  document.getElementById('hStat2').textContent=exp;
+  renderRecentHome();
+}
+
+function renderRecentHome(){
+  const rl=document.getElementById('recentList');
+  if(!rl)return;
+  const items=scanHistory.slice(0,4);
+  if(!items.length){rl.innerHTML='<div class="hist-empty" style="text-align:center;padding:32px 0;color:var(--muted);"><div style="font-size:32px;opacity:.5;margin-bottom:6px;">📋</div><div style="font-size:13px;">No scans yet</div></div>';return;}
+  rl.innerHTML=items.map((h,i)=>{
+    const d=parseExp(h.expiry||'');const s=expStatus(d);
+    const ic={'ok':'ri-ok','warning':'ri-warn','expired':'ri-exp','none':'ri-unk'}[s];
+    const em={'ok':'💊','warning':'⚡','expired':'⚠️','none':'📦'}[s];
+    return`<div class="gc recent-item" onclick="goPage('scanner')" style="animation-delay:${i*60}ms">
+      <div class="recent-icon ${ic}">${em}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="recent-name">${h.name||'Unknown'}</div>
+        <div class="recent-meta">${h.rms||'—'} · ${fmtExp(d)||'No expiry'} · Qty ${h.qty||1}</div>
+      </div>
+      <div class="pill ${s==='expired'?'pill-red':s==='warning'?'pill-amber':'pill-green'}" style="flex-shrink:0">${s==='expired'?'EXP':s==='warning'?'SOON':'OK'}</div>
+    </div>`;
+  }).join('');
+}
+
+function editHistItem(idx){
+  const h=scanHistory[idx];if(!h)return;
+  currentEntry={...h,editIdx:idx};
+  openResultSheet(null,null,true,h);
+}
+
+/* ═══════════════════════════════════════════
+   SCANNER CONTROL
+═══════════════════════════════════════════ */
+let qrCode=null,scanOn=false;
+
+async function startScan(){
+  if(scanOn)return;
+  document.getElementById('scanPlaceholder').style.display='none';
+  try{
+    qrCode=new Html5Qrcode('gs1Reader');
+    await qrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:90}},
+      decoded=>{stopScan();processInput(decoded);},null);
+    scanOn=true;
+    document.getElementById('viewfinder').classList.add('on');
+    document.getElementById('startBtn').classList.add('hidden');
+    document.getElementById('stopBtn').classList.remove('hidden');
+  }catch(e){
+    document.getElementById('scanPlaceholder').style.display='flex';
+    showToast('Camera error: '+(e.message||e));
+  }
+}
+async function stopScan(){
+  if(!qrCode)return;
+  try{await qrCode.stop();qrCode.clear();}catch{}
+  qrCode=null;scanOn=false;
+  document.getElementById('scanPlaceholder').style.display='flex';
+  document.getElementById('viewfinder').classList.remove('on');
+  document.getElementById('startBtn').classList.remove('hidden');
+  document.getElementById('stopBtn').classList.add('hidden');
+}
+
+function processInput(raw){
+  if(!raw?.trim())return;
+  const parsed=parseGS1(raw);
+  const match=tripleCheck(parsed.ais,raw);
+  const expiryRaw=parsed.ais['17']?.val||parsed.ais['15']?.val||'';
+  const batchRaw=parsed.ais['10']?.val||'';
+  currentEntry={raw,parsed,match,expiryRaw,batchRaw,editIdx:-1};
+  openResultSheet(match,parsed,false,null);
+}
+
+/* ═══════════════════════════════════════════
+   RESULT SHEET
+═══════════════════════════════════════════ */
+function openResultSheet(match,parsed,isEdit,editData){
+  const overlay=document.getElementById('rsOverlay');
+  overlay.classList.add('open');
+  const expiryRaw=isEdit?editData.expiry:currentEntry.expiryRaw;
+  const batchRaw=isEdit?editData.batch:currentEntry.batchRaw;
+
+  // status header
+  const unmatched=isEdit?false:!match?.product;
+  const statusEl=document.getElementById('rsStatus');
+  const iconEl=document.getElementById('rsIcon');
+  if(isEdit){statusEl.textContent='EDIT ENTRY';statusEl.style.color='var(--teal)';iconEl.textContent='✏️';}
+  else if(unmatched){statusEl.textContent='UNMATCHED PRODUCT';statusEl.style.color='var(--amber)';iconEl.textContent='⚠️';}
+  else{statusEl.textContent='PRODUCT FOUND';statusEl.style.color='var(--leaf)';iconEl.textContent='✅';}
+
+  // match steps
+  const stepsEl=document.getElementById('matchSteps');
+  if(!isEdit&&match?.steps){
+    stepsEl.innerHTML=match.steps.map((s,i)=>
+      `<div class="mstep ${s.pass?'hit':''}" style="animation-delay:${i*55}ms">
+        <div class="mnum ${s.pass?'p':'f'}">${s.n}</div>
+        <div class="mlbl ${s.pass?'p':'f'}">${s.lbl}</div>
+        <span style="font-size:11px">${s.pass?'✓':'·'}</span>
+      </div>`).join('');
+    stepsEl.style.display='flex';
+  }else{stepsEl.innerHTML='';stepsEl.style.display='none';}
+
+  // expiry alert
+  const d=parseExp(expiryRaw||'');const st=expStatus(d);
+  const alertEl=document.getElementById('rsExpiryAlert');
+  alertEl.className='exp-alert';
+  if(st==='expired'){alertEl.style.display='block';alertEl.classList.add('ea-exp');alertEl.textContent=`⚠ EXPIRED — ${fmtExp(d)}`;}
+  else if(st==='warning'){alertEl.style.display='block';alertEl.classList.add('ea-warn');const df=Math.ceil((d-new Date())/86400000);alertEl.textContent=`⚡ Expiring in ${df} days — ${fmtExp(d)}`;}
+  else if(st==='ok'){alertEl.style.display='block';alertEl.classList.add('ea-ok');alertEl.textContent=`✓ Valid — ${fmtExp(d)}`;}
+  else{alertEl.style.display='none';}
+
+  // product card
+  const pc=document.getElementById('rsProdCard');
+  const um=document.getElementById('rsUnmatched');
+  const p=isEdit?null:match?.product;
+  const nrtEl=document.getElementById('rsNrtWarn');
+  if(p||isEdit){
+    pc.style.display='block';um.style.display='none';
+    const src=isEdit?editData:p;
+    document.getElementById('rsPname').textContent=isEdit?editData.name:p.description;
+    document.getElementById('rsPbrand').textContent=isEdit?editData.section||'—':(p.section+' · Shelf '+p.shelf);
+    document.getElementById('rfRms').textContent=isEdit?editData.rms:p.rms;
+    document.getElementById('rfGtin').textContent=isEdit?editData.gtin:p.gtin;
+    document.getElementById('rfBatch').textContent=batchRaw||'—';
+    document.getElementById('rfShelf').textContent=isEdit?(editData.shelf||'—'):p.shelf;
+    document.getElementById('rfFacing').textContent=isEdit?'—':p.facing;
+    document.getElementById('rfSection').textContent=isEdit?editData.section||'—':p.section;
+    document.getElementById('rfMethod').textContent=isEdit?(editData.matchMethod||'—'):(match?.method||'—');
+    document.getElementById('rfUnits').textContent=isEdit?'—':p.units;
+    // expiry badge
+    const eb=document.getElementById('rsExpBadge');
+    eb.className='pexp-badge';
+    const cls={'ok':'pexp-ok','warning':'pexp-warn','expired':'pexp-exp','none':'pexp-none'}[st];
+    eb.classList.add(cls);
+    const lbl={'ok':'✓ Valid','warning':'⚡ Expiring','expired':'⚠ EXPIRED','none':'— No expiry'}[st];
+    eb.textContent=lbl+(d?` · ${fmtExp(d)}`:'');
+    // card color
+    pc.className=`prod-card-result ${st==='ok'||st==='none'?'ok':st}`;
+    // nrt
+    nrtEl.style.display=(p&&p.policy&&p.policy.includes('Non'))?'block':'none';
+  }else{
+    pc.style.display='none';um.style.display='block';nrtEl.style.display='none';
+    const sw=document.getElementById('rsScoreWrap');
+    const sc=match?.score||0;
+    if(sc>0){sw.style.display='block';document.getElementById('rsScoreLbl').textContent=`Best: ${(sc*100).toFixed(1)}%`;document.getElementById('rsScoreBar').style.width=`${sc*100}%`;}
+    else{sw.style.display='none';}
+  }
+
+  // form
+  document.getElementById('rsExpiry').value=expiryRaw||'';
+  document.getElementById('rsBatch').value=batchRaw||'';
+  document.getElementById('rs-qty').value=isEdit?editData.qty||1:1;
+  expPrevText(expiryRaw||'');
+
+  const addMasterBtn=document.getElementById('rsAddMasterBtn');
+  addMasterBtn.style.display=(p||isEdit)?'none':'flex';
+  document.getElementById('rsSaveBtn').textContent=isEdit?'💾 Update Entry':'💾 Save to History';
+}
+
+function closeSheet(){
+  document.getElementById('rsOverlay').classList.remove('open');
+  currentEntry=null;
+}
+
+function qtyAdj(d){const el=document.getElementById('rs-qty');el.value=Math.max(1,(parseInt(el.value)||1)+d);}
+
+function saveEntry(){
+  const match=currentEntry?.match;
+  const p=match?.product;
+  const entry={
+    name:p?p.description:(currentEntry?.editIdx>=0?scanHistory[currentEntry.editIdx].name:'Unknown'),
+    rms:p?p.rms:(currentEntry?.editIdx>=0?scanHistory[currentEntry.editIdx].rms:''),
+    gtin:p?p.gtin:'',
+    shelf:p?p.shelf:'',
+    section:p?p.section:'',
+    policy:p?p.policy:'',
+    matchMethod:match?.method||null,
+    expiry:document.getElementById('rsExpiry').value.trim(),
+    batch:document.getElementById('rsBatch').value.trim(),
+    qty:parseInt(document.getElementById('rs-qty').value)||1,
+    savedAt:new Date().toLocaleString(),
+  };
+  const idx=currentEntry?.editIdx??-1;
+  if(idx>=0){scanHistory[idx]=entry;}else{scanHistory.unshift(entry);}
+  lsSet('pt-scan-history',scanHistory);
+  renderHistory();
+  closeSheet();
+  showToast(idx>=0?'Entry updated':'Saved ✓');
+}
+
+function addToMasterAndSave(){
+  const raw=currentEntry?.raw||'';
+  const parsed=currentEntry?.parsed;
+  const gtinRaw=parsed?.ais?.['01']?.val||raw;
+  const newP={gtin:normalizeGTIN(gtinRaw),barcode:gtinRaw,rms:'',description:'Unknown Product',facing:1,units:0,shelf:'?',section:'Manual',policy:'Unknown'};
+  MASTER_DB.push(newP);
+  saveEntry();
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════════ */
+function dlCSV(fn,rows){
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fn;a.click();
+}
+function exportHistCSV(){
+  if(!scanHistory.length){showToast('No history');return;}
+  const rows=[['Name','GTIN','RMS','Shelf','Section','Expiry','Batch','Qty','Method','Saved At']];
+  scanHistory.forEach(h=>rows.push([h.name,h.gtin,h.rms,h.shelf,h.section,h.expiry,h.batch,h.qty,h.matchMethod||'',h.savedAt]));
+  dlCSV(`scan_history_${new Date().toISOString().slice(0,10)}.csv`,rows);
+}
+
+/* ═══════════════════════════════════════════
+   KPI
+═══════════════════════════════════════════ */
+const KPI_SLOTS=['12AM–6AM','6–8AM','8–10AM','10AM–12PM','12–2PM','2–4PM','4–6PM','6–8PM','8–10PM','10PM–12AM'];
+let kpiData=[];
+let calcCtx={row:-1,field:''};
+let calcStr='';
+
+function renderKpi(){
+  const c=document.getElementById('kpiSlots');
+  c.innerHTML=kpiData.map((r,i)=>{
+    const atv=r.trn>0?(r.sale/r.trn).toFixed(1):'—';
+    return`<div class="kpi-slot" onclick="openCalc(${i})">
+      <div class="kpi-time">${r.slot}</div>
+      <div class="kpi-fields">
+        <div><div class="kpi-val-label">Sale AED</div><div class="kpi-val" style="color:var(--lemon)">${r.sale||0}</div></div>
+        <div><div class="kpi-val-label">TRN</div><div class="kpi-val">${r.trn||0}</div></div>
+        <div><div class="kpi-val-label">No7</div><div class="kpi-val" style="color:var(--leaf)">${r.no7||0}</div></div>
+        <div><div class="kpi-val-label">Aura</div><div class="kpi-val" style="color:var(--amber)">${r.aura||0}</div></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--teal);font-weight:800;white-space:nowrap">${atv}</div>
+    </div>`;
+  }).join('');
+  let tS=0,tT=0,tN=0,tA=0;
+  kpiData.forEach(r=>{tS+=r.sale;tT+=r.trn;tN+=r.no7;tA+=r.aura;});
+  document.getElementById('ktSale').textContent=tS.toLocaleString();
+  document.getElementById('ktTrn').textContent=tT;
+  document.getElementById('ktAtv').textContent=tT>0?(tS/tT).toFixed(1):'0.0';
+  document.getElementById('ktNo7').textContent=tS>0?((tN/tS)*100).toFixed(1)+'%':'0%';
+  document.getElementById('ktAura').textContent=tT>0?((tA/tT)*100).toFixed(1)+'%':'0%';
+}
+
+function openCalc(rowIdx){
+  calcCtx={row:rowIdx,field:'sale'};
+  calcStr=kpiData[rowIdx].sale===0?'':String(kpiData[rowIdx].sale);
+  document.getElementById('calcTitle').textContent=`${kpiData[rowIdx].slot}`;
+  document.getElementById('cMain').textContent=calcStr||'0';
+  document.getElementById('cFormula').textContent='';
+  document.getElementById('calcOverlay').classList.add('open');
+}
+function closeCalc(){document.getElementById('calcOverlay').classList.remove('open');}
+
+function safeEval(e){
+  const c=e.replace(/[^0-9+\-*/.]/g,'');if(!c)return 0;
+  let pos=0;
+  const pk=()=>c[pos],cm=()=>c[pos++];
+  function pNum(){let s=pos;if(pk()==='-')cm();while(pos<c.length&&/[0-9.]/.test(pk()))cm();const n=parseFloat(c.slice(s,pos));return isNaN(n)?0:n;}
+  function pTerm(){let v=pNum();while(pos<c.length&&(pk()==='*'||pk()==='/')){const op=cm(),r=pNum();v=op==='*'?v*r:r?v/r:0;}return v;}
+  function pExpr(){let v=pTerm();while(pos<c.length&&(pk()==='+'||pk()==='-')){const op=cm(),r=pTerm();v=op==='+'?v+r:v-r;}return v;}
+  const r=pExpr();return isFinite(r)?r:0;
+}
+
+function cp(v){
+  const main=document.getElementById('cMain'),form=document.getElementById('cFormula');
+  if(v==='C'){calcStr='';main.textContent='0';form.textContent='';}
+  else if(v==='='){
+    const val=parseFloat((safeEval(calcStr)||0).toFixed(2));
+    kpiData[calcCtx.row].sale=val;
+    // ask for trn too
+    const r=kpiData[calcCtx.row];
+    const trn=prompt('TRN count:',r.trn||'');
+    const no7=prompt('No7 (AED):',r.no7||'');
+    const aura=prompt('Aura TRN:',r.aura||'');
+    if(trn!==null)r.trn=parseInt(trn)||0;
+    if(no7!==null)r.no7=parseFloat(no7)||0;
+    if(aura!==null)r.aura=parseInt(aura)||0;
+    lsSet('pt-kpi',kpiData);renderKpi();closeCalc();
+  }else{calcStr+=v;main.textContent=calcStr;form.textContent='= '+safeEval(calcStr.replace(/[+\-*/.]$/,''));}
+}
+
+function resetKpi(){if(!confirm('Reset all KPI data?'))return;kpiData=KPI_SLOTS.map(s=>({slot:s,sale:0,trn:0,no7:0,aura:0}));lsSet('pt-kpi',kpiData);renderKpi();showToast('KPI reset');}
+function exportKpiCSV(){
+  const rows=[['Time Slot','Sale AED','TRN','ATV','No7 AED','No7 %','Aura TRN','Aura %']];
+  kpiData.forEach(r=>{const atv=r.trn>0?(r.sale/r.trn).toFixed(1):'0';const n7p=r.sale>0?((r.no7/r.sale)*100).toFixed(1):'0';const aup=r.trn>0?((r.aura/r.trn)*100).toFixed(1):'0';rows.push([r.slot,r.sale,r.trn,atv,r.no7,n7p+'%',r.aura,aup+'%']);});
+  dlCSV(`kpi_${new Date().toISOString().slice(0,10)}.csv`,rows);
+}
+
+/* ═══════════════════════════════════════════
+   PLANNER
+═══════════════════════════════════════════ */
+let currentSection='all';
+let plannerQuery='';
+
+function groupByShelves(items){
+  const g={};items.forEach(p=>{if(!g[p.shelf])g[p.shelf]=[];g[p.shelf].push(p);});return g;}
+
+function sectionLabel(k){return{'Joint':'Joint & Bone','Omega':'Omega / Fatty Acids','Weight':'Weight Management','Sleep':'Sleep & Relax'}[k]||k;}
+function shelfLabel(s){
+  const base=s.replace(/^[WS]/,'');
+  const prefix=s.startsWith('W')?'Wt.':s.startsWith('S')?'Sleep ':'Vitamins ';
+  return prefix+'Shelf '+base;
+}
+
+function renderPlanner(){
+  const con=document.getElementById('plannerList');
+  const q=plannerQuery.toLowerCase();
+  let items=MASTER_DB.filter(p=>{
+    const secOk=currentSection==='all'||p.section===currentSection;
+    const qOk=!q||(p.description.toLowerCase().includes(q)||p.barcode.toLowerCase().includes(q)||p.rms.toLowerCase().includes(q)||p.shelf.toLowerCase().includes(q));
+    return secOk&&qOk;
+  });
+  if(!items.length){con.innerHTML='<div style="text-align:center;padding:36px 0;color:var(--muted);font-size:13px;">No products found</div>';return;}
+  const grouped=groupByShelves(items);
+  const sectionEmoji={'Joint':'💊','Omega':'🐟','Weight':'⚖️','Sleep':'🌙'};
+  con.innerHTML=Object.keys(grouped).sort().map((shelf,si)=>{
+    const prods=grouped[shelf];
+    const oos=prods.filter(p=>p.units===0).length;
+    const low=prods.filter(p=>p.units>0&&p.units<=4).length;
+    const secLabel=prods[0]?.section||'';
+    const secEm=sectionEmoji[secLabel]||'📦';
+    const rows=prods.map(p=>{
+      const uc=p.units===0?'units-oos':p.units<=4?'units-low':'units-ok';
+      const ic=p.units===0?'oos':'';
+      return`<div class="prod-row" onclick="scanFromPlanner('${p.barcode}')">
+        <div class="prod-icon ${ic}">${p.units===0?'❌':'💊'}</div>
+        <div class="prod-info">
+          <div class="prod-name">${p.description}</div>
+          <div class="prod-bc">${p.barcode} · ${p.rms}</div>
+        </div>
+        <div class="prod-units ${uc}">${p.units===0?'OOS':p.units}</div>
+      </div>`;
+    }).join('');
+    return`<div class="shelf-item" style="animation-delay:${si*40}ms">
+      <div class="shelf-hdr" id="sh-${shelf}" onclick="toggleShelf('${shelf}')">
+        <div class="shelf-hdr-left">
+          <div class="shelf-num">${secEm}</div>
+          <div>
+            <div class="shelf-title">${shelfLabel(shelf)}</div>
+            <div class="shelf-sub">${prods.length} products${oos?` · <span style="color:var(--red)">${oos} OOS</span>`:''}${low?` · <span style="color:var(--amber)">${low} Low</span>`:''}</div>
+          </div>
+        </div>
+        <span id="sh-arr-${shelf}" style="color:var(--muted);font-size:14px;transition:transform .2s">›</span>
+      </div>
+      <div class="shelf-body" id="sb-${shelf}">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleShelf(id){
+  const hdr=document.getElementById('sh-'+id);
+  const body=document.getElementById('sb-'+id);
+  const arr=document.getElementById('sh-arr-'+id);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  hdr.classList.toggle('open',!open);
+  arr.style.transform=open?'':'rotate(90deg)';
+}
+
+function filterSection(sec,btn){
+  currentSection=sec;
+  document.querySelectorAll('.sbar-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlanner();
+}
+
+function scanFromPlanner(bc){
+  goPage('scanner');
+  setTimeout(()=>{
+    document.getElementById('manualInp').value=bc;
+    processInput(bc);
+  },200);
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+const PAGES=['home','kpi','scanner','planner'];
+function goPage(id){
+  if(id!=='scanner')stopScan();
+  PAGES.forEach(p=>{
+    document.getElementById('pg-'+p).classList.toggle('active',p===id);
+    document.getElementById('bnav-'+p).classList.toggle('active',p===id);
+  });
+}
+
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('tcMeta').content=next==='dark'?'#06132F':'#EBF0FF';
+  lsSet('pt-theme',next);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+function init(){
+  // theme
+  const th=lsGet('pt-theme','dark');
+  document.documentElement.setAttribute('data-theme',th);
+  document.getElementById('tcMeta').content=th==='dark'?'#06132F':'#EBF0FF';
+  // data
+  kpiData=lsGet('pt-kpi',KPI_SLOTS.map(s=>({slot:s,sale:0,trn:0,no7:0,aura:0})));
+  scanHistory=lsGet('pt-scan-history',[]);
+  // render
+  renderKpi();renderHistory();renderPlanner();updateHomeStats();
+  // clock
+  setInterval(()=>{document.getElementById('liveClock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});},1000);
+  document.getElementById('liveClock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  // events
+  document.getElementById('manualBtn').addEventListener('click',()=>{const v=document.getElementById('manualInp').value;if(v.trim()){processInput(v);document.getElementById('manualInp').value='';}});
+  document.getElementById('manualInp').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value;if(v.trim()){processInput(v);e.target.value='';}}}); 
+  document.getElementById('startBtn').addEventListener('click',startScan);
+  document.getElementById('stopBtn').addEventListener('click',stopScan);
+  document.getElementById('sampleBtn').addEventListener('click',()=>{processInput(SAMPLES[sampleIdx%SAMPLES.length]);sampleIdx++;});
+  document.getElementById('exportHistBtn').addEventListener('click',exportHistCSV);
+  document.getElementById('clearHistBtn').addEventListener('click',()=>{if(!confirm('Clear all history?'))return;scanHistory=[];lsSet('pt-scan-history',[]);renderHistory();showToast('History cleared');});
+  document.getElementById('searchToggleBtn').addEventListener('click',()=>{const b=document.getElementById('histSearchWrap');b.style.display=b.style.display==='none'?'block':'none';if(b.style.display!=='none')document.getElementById('histSearch').focus();});
+  document.getElementById('histSearch').addEventListener('input',e=>renderHistory(e.target.value.toLowerCase()));
+  document.getElementById('plannerSearch').addEventListener('input',e=>{plannerQuery=e.target.value;renderPlanner();});
+  document.getElementById('rsExpiry').addEventListener('input',e=>expPrevText(e.target.value));
+  document.getElementById('rsSaveBtn').addEventListener('click',saveEntry);
+  document.getElementById('rsAddMasterBtn').addEventListener('click',addToMasterAndSave);
+  document.getElementById('rsOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('rsOverlay'))closeSheet();});
+  // offline
+  window.addEventListener('offline',()=>document.getElementById('offlineTag').classList.add('show'));
+  window.addEventListener('online',()=>document.getElementById('offlineTag').classList.remove('show'));
+  // SW
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+init();
+</script>
+</body>
+</html>
